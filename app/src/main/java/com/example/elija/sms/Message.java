@@ -195,7 +195,7 @@ public class Message extends AppCompatActivity  {
     }
 
     //gets the in coming SMS message, decrypts it if it can, if not it displays the encrypted message.
-    public void updateInbox(final String smsMessage, String smsBody) {
+    public void updateInbox(String smsMessage, String smsBody) {
          secretkey2 = (EditText)findViewById(R.id.secretkey);
         String secretkey = secretkey2.getText().toString();
         String decryptedmessage;
@@ -227,15 +227,16 @@ public class Message extends AppCompatActivity  {
             } catch (Exception e) {
                 // in the case of message corrupted or invalid key
                 // decryption cannot be carried out
-                if(secretkey.length() != 16 &&
-                        smsMessage.contains("SMS From: " + number) ||
-                        smsMessage.contains("SMS From: +1" + number)) {
-                    convo.add(new Conversation("", smsMessage, ""));
-                    adapter.notifyDataSetChanged();
+                    Log.e("catch","" + e);
                 }
-            }
+            }else if(secretkey.length() != 16 &&
+                smsMessage.contains("SMS From: " + number) ||
+                smsMessage.contains("SMS From: +1" + number)){
+            smsMessage = smsMessage.replace(number, title);
+            convo.add(new Conversation("", smsMessage, ""));
+            adapter.notifyDataSetChanged();
         }
-    }
+        }
 
     //permissions to read from sms messages. dont touch this
     @RequiresApi(api = Build.VERSION_CODES.M)
