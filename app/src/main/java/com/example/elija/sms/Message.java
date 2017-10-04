@@ -228,14 +228,14 @@ public class Message extends AppCompatActivity  {
                 // in the case of message corrupted or invalid key
                 // decryption cannot be carried out
                     Log.e("catch","" + e);
+                if(secretkey.length() != 16 &&
+                        smsMessage.contains("SMS From: " + number) ||
+                        smsMessage.contains("SMS From: +1" + number)){
+                    convo.add(new Conversation("", smsMessage, ""));
+                    adapter.notifyDataSetChanged();
                 }
-            }else if(secretkey.length() != 16 &&
-                smsMessage.contains("SMS From: " + number) ||
-                smsMessage.contains("SMS From: +1" + number)){
-            smsMessage = smsMessage.replace(number, title);
-            convo.add(new Conversation("", smsMessage, ""));
-            adapter.notifyDataSetChanged();
-        }
+                }
+            }
         }
 
     //permissions to read from sms messages. dont touch this
