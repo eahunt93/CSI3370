@@ -27,7 +27,7 @@ import java.util.Collections;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-public class Message extends AppCompatActivity  {
+public class Message extends AppCompatActivity {
     public String title;
     public String number;
     EditText secretkey2;
@@ -55,10 +55,10 @@ public class Message extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-        listView = (ListView)findViewById(R.id.convo);
+        listView = (ListView) findViewById(R.id.convo);
         //allow SMS sending
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECEIVE_SMS},1);
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS},1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, 1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 1);
 
         //gets our variables and arraylist from the last page
         contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("contact");
@@ -66,15 +66,15 @@ public class Message extends AppCompatActivity  {
         number = getIntent().getStringExtra("number").toString();
 
         //formats the phone number string so it can match the phone number coming in. probably shouldnt touch this
-        if(number.contains("(") ||
+        if (number.contains("(") ||
                 number.contains(")") ||
-                number.contains(" ")||
-                number.contains("-")){
+                number.contains(" ") ||
+                number.contains("-")) {
 
-            number =  number.replace("(", "");
+            number = number.replace("(", "");
             number = number.replace(")", "");
-            number  =number.replace(" ", "");
-            number = number.replace("-","");
+            number = number.replace(" ", "");
+            number = number.replace("-", "");
         }
         Log.e("Formatted number", number);
 
@@ -126,13 +126,13 @@ public class Message extends AppCompatActivity  {
 
                 // check for the validity of the user input
                 // key length should be 16 characters as defined by AES-128-bit
-                    // encrypt the message
-                    byte[] encryptedMsg = encryptSMS(secretkeyfuck, msgContentString);
-                    // convert the byte array to hex format in order for
-                    // transmission
-                    String msgString = byte2hex(encryptedMsg);
-                    // send the message through SMS
-                    sendSMS(phonenumber, msgString);
+                // encrypt the message
+                byte[] encryptedMsg = encryptSMS(secretkeyfuck, msgContentString);
+                // convert the byte array to hex format in order for
+                // transmission
+                String msgString = byte2hex(encryptedMsg);
+                // send the message through SMS
+                sendSMS(phonenumber, msgString);
 
                 convo.add(new Conversation(msgContentString, "", ""));
                 adapter.notifyDataSetChanged();
@@ -154,6 +154,7 @@ public class Message extends AppCompatActivity  {
             e.printStackTrace();
         }
     }
+
     // utility function dont touch this
     public static String byte2hex(byte[] b) {
         String hs = "";
@@ -168,6 +169,7 @@ public class Message extends AppCompatActivity  {
         }
         return hs.toUpperCase();
     }
+
     // encryption function dont touch this
     public static byte[] encryptSMS(String secretKeyString, String msgContentString) {
         try {
@@ -187,6 +189,7 @@ public class Message extends AppCompatActivity  {
             return returnArray;
         }
     }
+
     //just generating a secret key. dont touch this
     private static Key generateKey(String secretKeyString) throws Exception {
         // generate secret key from string
@@ -196,7 +199,7 @@ public class Message extends AppCompatActivity  {
 
     //gets the in coming SMS message, decrypts it if it can, if not it displays the encrypted message.
     public void updateInbox(String smsMessage, String smsBody) {
-         secretkey2 = (EditText)findViewById(R.id.secretkey);
+        secretkey2 = (EditText) findViewById(R.id.secretkey);
         String secretkey = secretkey2.getText().toString();
         String decryptedmessage;
 //        if(smsMessage.contains("SMS From: " + number) || smsMessage.contains("SMS From: +1" + number)) {
@@ -216,8 +219,8 @@ public class Message extends AppCompatActivity  {
 
                 String idk = new String(result);
                 //just formatting the decrypted message
-                if(idk.contains("Sent: ")){
-                   idk = idk.replace("Sent: ", "");
+                if (idk.contains("Sent: ")) {
+                    idk = idk.replace("Sent: ", "");
                 }
 
                 decryptedmessage = "SMS From " + title + ": " + idk;
@@ -227,16 +230,13 @@ public class Message extends AppCompatActivity  {
             } catch (Exception e) {
                 // in the case of message corrupted or invalid key
                 // decryption cannot be carried out
-                    Log.e("catch","" + e);
-                if(secretkey.length() != 16 &&
-                        smsMessage.contains("SMS From: " + number) ||
-                        smsMessage.contains("SMS From: +1" + number)){
-                    convo.add(new Conversation("", smsMessage, ""));
-                    adapter.notifyDataSetChanged();
-                }
-                }
+                smsMessage = smsMessage.replace(number, title);
+                convo.add(new Conversation("", smsMessage, ""));
+                adapter.notifyDataSetChanged();
+                Log.e("catch", "" + e);
             }
         }
+    }
 
     //permissions to read from sms messages. dont touch this
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -273,7 +273,6 @@ public class Message extends AppCompatActivity  {
         }
 
 
-
     }
 
     //gets all recieved messages in SMS inbox. eventually we want to get all messages but its tricky.
@@ -305,7 +304,7 @@ public class Message extends AppCompatActivity  {
             String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
                     "\n" + smsInboxCursor.getString(indexBody) + "\n";
 
-            if( str.contains("SMS From: " + number) || str.contains("SMS From: +1" + number)) {
+            if (str.contains("SMS From: " + number) || str.contains("SMS From: +1" + number)) {
                 adapter.add(new Conversation("", str, ""));
             }
         } while (smsInboxCursor.moveToNext());
