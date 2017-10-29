@@ -10,14 +10,12 @@ public class Contact implements Serializable{
     String contact;
     String number;
     String secretkey;
-    String message;
 
 
-    public Contact(String contact, String number, String secretkey, String message){
+    public Contact(String contact, String number, String secretkey){
         this.contact = contact;
         this.number = number;
         this.secretkey = secretkey;
-        this.message = message;
 
     }
 
@@ -43,13 +41,6 @@ public class Contact implements Serializable{
 
     public String getSecretkey() {
         return secretkey;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     @Override

@@ -1,0 +1,102 @@
+
+Extension/inheritance <|--
+Composition	*--
+Aggregation	o--
+directed association <--
+dependency <..
+
+@startuml
+
+class MainActivity
+class Message
+class Conversation
+Class Contact
+Class ContactsAdapter
+Class ConvoAdapter
+Class BroadcastReciever
+Class MyDBHandler
+
+MainActivity"1" -*"*" Contact
+MainActivity --> ContactsAdapter
+ContactsAdapter --> Contact
+Contact--o Conversation
+Message --> MainActivity
+Message->Conversation
+
+
+
+class MainActivity{
+-SecretKey: EditText
++Secretkey: String
+-listview: ListView
+-adapter: ContactsAdapter
++contact: ArrayList<Contact>
+-fos: FileOutputStream
+-FILENAME: String
+#onCreate(Bundle):Void
+}
+Class Message{
++title: String
+-ContactSecretKey: EditText
+-contactsecretkey: String
+-contacts: ArrayList<Contacts>
+-convo: ArrayList<Conversation>
+-adapter: ConvoAdapter
+-listview: ListView
+-EditText: message
+-MessageContent: String
+-DBHAndler: MyDBHandler
+#onCreate(Bundle): Void
++sendSMS(String): Void
++byte2hex(byte[]): String
++hex2byte(byte[]): byte[]
++encryptSMS(String,String): byte[]
++decryptSMS(String,byte[]): String
++refreshSMSinbox(): Void
+}
+
+Class Conversation{
+-sentmessage: String
+-recievedmessage: String
+-Contact: String
++getSentMessage(): String
++getRecievedMessage():String
++getContact(): String
+}
+Class ConvoAdapter{
++ConvoAdapter(Context,ArrayList<Conversation>)
++getView(int, View, ViewGroup): View
+}
+Class ContactsAdapter{
++ContactAdapter(Context,ArrayList<Contact>)
++getView(int, View, ViewGroup):View
+}
+Class Contact{
+-Contact: String
+-number: String
+-SecretKey: String
++Contact(String, String,String)
++getNumber():String
++getContact(): String
++getSecretKey(): String
++setSecretKey(): String
+}
+Class BroadcastReciever{
++onReciever(Context,Intent): Void
+}
+Class MyDBHandler{
+-DATABASE_VERSON: int
+-DATABASE_NAME: String
+-TABLE_NAME:String
+-TABLE_NUMBER: String
+-TABLE_SECRET_KEY: String
+-COLUMN_ID: int
++onCreate(SQLiteDatabase): Void
++onUpgrade(SQLiteDatabase, int, int): Void
+
+
+
+}
+
+
+@enduml

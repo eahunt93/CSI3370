@@ -40,7 +40,7 @@ public class ConvoAdapter extends ArrayAdapter<Conversation> {
         sent.setText(currentConversation.getSentmessage());
 
         TextView recieved = (TextView)listItemView.findViewById(R.id.recieved);
-        recieved.setText(currentConversation.getRecievedmessage());
+        recieved.setText(currentConversation.toString());
 
         return listItemView;
     }

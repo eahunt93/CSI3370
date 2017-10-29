@@ -1,0 +1,45 @@
+
+Extension/inheritance <|--
+Composition	*--
+Aggregation	o--
+directed association <--
+dependency <..
+
+@startuml
+
+class MainActivity
+class Message
+class Conversation
+Class Contact
+Class ContactsAdapter
+Class ConvoAdapter
+Class BroadcastReciever
+Class MyDPHelper
+
+MainActivity "1"  -- "*"Contact : store
+MainActivity"1" -- "1"ContactsAdapter: Display
+MainActivity -Message : Selected contact
+Message"1" --"1" ConvoAdapter : Display
+Message"1" -- "*" Conversation : Store
+Message"1" -"*" BroadcastReciever : Recieve message
+Message -- MyDPHelper : SecretKey
+
+
+Class MainActivity{
+adapter: ContactsAdapter
+contacts: ArrayList<Contacts>
+secretKey: EditText
+SecretKey: String
+}
+
+Class Message{
+ContactSecretKey: EditText
+contactsecretkey: String
+convo: ArrayList<Conversation>
+UpdateSMSInbox(Conversation): Void
+GetSMSMessages(): Void
+sendSMS(String, String): Void
+encryptSMS(String, String): byte[]
+}
+
+@enduml

@@ -6,28 +6,29 @@ package com.example.elija.sms;
 
 public class Conversation {
     String sentmessage;
-    String recievedmessage;
-    String messagefrom;
-    public Conversation(String sentmessage, String recievedmessage, String messagefrom){
-        this.messagefrom = messagefrom;
-        this.recievedmessage =recievedmessage;
+    String body;
+    String Address;
+    public Conversation(String sentmessage, String MessageBody, String Address){
         this.sentmessage = sentmessage;
+        this.body = MessageBody;
+        this.Address = Address;
+
     }
 
-    public String getMessagefrom() {
-        return messagefrom;
+    public String getAddress() {
+        return Address;
     }
 
-    public void setMessagefrom(String messagefrom) {
-        this.messagefrom = messagefrom;
+    public void setAddress(String address) {
+        Address = address;
     }
 
-    public String getRecievedmessage() {
-        return recievedmessage;
+    public String getBody() {
+        return body;
     }
 
-    public void setRecievedmessage(String recievedmessage) {
-        this.recievedmessage = recievedmessage;
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getSentmessage() {
@@ -40,7 +41,6 @@ public class Conversation {
 
     @Override
     public String toString() {
-        return "Sent: " + sentmessage + "\n"+
-                "recieved message" + recievedmessage;
+        return  Address + "\n " + body ;
     }
 }

@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -26,6 +25,8 @@ import java.util.Collections;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import static android.os.Build.VERSION_CODES.M;
 
 public class Message extends AppCompatActivity {
     public String title;
@@ -50,7 +51,7 @@ public class Message extends AppCompatActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +65,8 @@ public class Message extends AppCompatActivity {
         contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("contact");
         title = getIntent().getStringExtra("title").toString();
         number = getIntent().getStringExtra("number").toString();
+
+
 
         //formats the phone number string so it can match the phone number coming in. probably shouldnt touch this
         if (number.contains("(") ||
@@ -81,6 +84,7 @@ public class Message extends AppCompatActivity {
         //sets the title and gets the users secret key from the MainActivity
         secretkey = getIntent().getStringExtra("mykey").toString();
         setTitle(title);
+
 
 
         //sets the array adapter and puts it in the listview
@@ -107,6 +111,31 @@ public class Message extends AppCompatActivity {
                 for (int i = 0; i < contacts.size(); i++) {
                     if (title.equals(contacts.get(i).getContact())) {
                         contacts.get(i).setSecretkey(secretkey2.getText().toString());
+                    }
+
+                    for(i =0; i< convo.size(); i++){
+                        String de = convo.get(i).getBody();
+                        try {
+                            // convert the encrypted String message body to a byte
+                            // array
+                            byte[] msg = hex2byte(convo.get(i).getBody().getBytes());
+                            // decrypt the byte array
+                            byte[] result = decryptSMS(secretkey2.getText().toString(), msg);
+
+                            String idk = new String(result);
+                            if (idk.contains("Sent: ")) {
+                                idk = idk.replace("Sent: ", "");
+                            }
+
+                            Conversation c1 = new Conversation("", idk, convo.get(i).getAddress());
+                           convo.add(c1);
+                            adapter.notifyDataSetChanged();
+                            Log.e("HEEEELLLOOOO", convo.get(i).toString());
+                        } catch (Exception e) {
+                            // in the case of message corrupted or invalid key
+                            // decryption cannot be carried out
+                            Log.e("catch", "" + e);
+                        }
                     }
                 }
             }
@@ -198,7 +227,7 @@ public class Message extends AppCompatActivity {
     }
 
     //gets the in coming SMS message, decrypts it if it can, if not it displays the encrypted message.
-    public void updateInbox(String smsMessage, String smsBody) {
+    public void updateInbox(Conversation c) {
         secretkey2 = (EditText) findViewById(R.id.secretkey);
         String secretkey = secretkey2.getText().toString();
         String decryptedmessage;
@@ -207,13 +236,11 @@ public class Message extends AppCompatActivity {
 //            convo.add(new Conversation("", smsMessage, ""));
 //            adapter.notifyDataSetChanged();
 //        }
-        if (secretkey.length() == 16 &&
-                smsMessage.contains("SMS From: " + number) ||
-                smsMessage.contains("SMS From: +1" + number)) {
+        if (c.getAddress().equals(number)||c.getAddress().equals("+1"+number)) {
             try {
                 // convert the encrypted String message body to a byte
                 // array
-                byte[] msg = hex2byte(smsBody.getBytes());
+                byte[] msg = hex2byte(c.getBody().getBytes());
                 // decrypt the byte array
                 byte[] result = decryptSMS(secretkey, msg);
 
@@ -222,16 +249,14 @@ public class Message extends AppCompatActivity {
                 if (idk.contains("Sent: ")) {
                     idk = idk.replace("Sent: ", "");
                 }
-
-                decryptedmessage = "SMS From " + title + ": " + idk;
-                convo.add(new Conversation("", decryptedmessage, ""));
+                Conversation c1 = new Conversation("", idk, c.getAddress());
+                convo.add(c1);
                 adapter.notifyDataSetChanged();
-                Log.e("HEEEELLLOOOO", decryptedmessage);
+                Log.e("HEEEELLLOOOO", c1.toString());
             } catch (Exception e) {
                 // in the case of message corrupted or invalid key
                 // decryption cannot be carried out
-                smsMessage = smsMessage.replace(number, title);
-                convo.add(new Conversation("", smsMessage, ""));
+                convo.add(c);
                 adapter.notifyDataSetChanged();
                 Log.e("catch", "" + e);
             }
@@ -239,7 +264,7 @@ public class Message extends AppCompatActivity {
     }
 
     //permissions to read from sms messages. dont touch this
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = M)
     public void getPermissionToReadSMS() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -277,6 +302,9 @@ public class Message extends AppCompatActivity {
 
     //gets all recieved messages in SMS inbox. eventually we want to get all messages but its tricky.
     public void refreshSmsInbox() {
+
+
+
         //this is a cursor to go through and get all of your recieved messages
         ContentResolver contentResolver = getContentResolver();
         Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"),
@@ -286,26 +314,16 @@ public class Message extends AppCompatActivity {
         //this gets the address the message came from
         int indexAddress = smsInboxCursor.getColumnIndex("address");
 
-        //this is a cursor to go throught and get all the messages that you sent
-        Cursor smsInboxCursor2 = contentResolver.query(Uri.parse("content://sms/sent"),
-                null, null, null, null);
-
-        //this gets the message itself
-        int Sentbody = smsInboxCursor2.getColumnIndex("body");
-        //this gets the address that the message was sent too
-        int Sentaddress = smsInboxCursor2.getColumnIndex("address");
-
 
         //right now its only getting messages sent to you
         if (indexBody < 0 || !smsInboxCursor.moveToFirst())
             return;
         adapter.clear();
         do {
-            String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
-                    "\n" + smsInboxCursor.getString(indexBody) + "\n";
+            Conversation c = new Conversation("",smsInboxCursor.getString(indexBody),smsInboxCursor.getString(indexAddress));
 
-            if (str.contains("SMS From: " + number) || str.contains("SMS From: +1" + number)) {
-                adapter.add(new Conversation("", str, ""));
+            if (c.getAddress().equals(number)|| c.getAddress().equals("+1" + number)){
+                adapter.add(c);
             }
         } while (smsInboxCursor.moveToNext());
         Collections.reverse(convo);
@@ -336,4 +354,8 @@ public class Message extends AppCompatActivity {
         byte[] decValue = c.doFinal(encryptedMsg);
         return decValue;
     }
+
+
+
+
 }

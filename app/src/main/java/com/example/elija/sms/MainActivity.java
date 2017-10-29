@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_main);
 
         //getting permission to access our contacts
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_CONTACTS},1);
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},1);
 
         contact  = new ArrayList<Contact>();
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity  {
                     ContactsContract.CommonDataKinds.Phone.CONTACT_ID+ "= ?", new String[]{id},null);
             while(phoneCurser.moveToNext()){
                 String phoneNumber = phoneCurser.getString(phoneCurser.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                contact.add(new Contact(name,phoneNumber, "", ""));
+                contact.add(new Contact(name,phoneNumber, ""));
             }
         }
         //puts our contacts in the array adapter
@@ -116,4 +116,6 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
     }
+
+
 }
