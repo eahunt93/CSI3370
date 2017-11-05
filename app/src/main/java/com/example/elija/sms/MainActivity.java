@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity  {
     FileOutputStream fos;
     String secret;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -7,11 +7,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.telephony.SmsMessage;
-
 /**
  * Created by elija on 9/23/2017.
  */
-
 public class BroadcastReciever extends BroadcastReceiver {
 
     public static final String SMS_BUNDLE = "pdus";
@@ -19,7 +17,6 @@ public class BroadcastReciever extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle intentExtras = intent.getExtras();
-
         if (intentExtras != null) {
             Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
             String smsMessageStr = "";
@@ -41,5 +38,4 @@ public class BroadcastReciever extends BroadcastReceiver {
             inst.updateInbox(c);
         }
     }
-
 }

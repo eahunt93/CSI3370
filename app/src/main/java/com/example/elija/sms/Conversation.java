@@ -14,7 +14,6 @@ public class Conversation {
         this.Address = Address;
 
     }
-
     public String getAddress() {
         return Address;
     }

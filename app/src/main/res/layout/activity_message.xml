@@ -17,7 +17,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Submit secret key"
+        android:text="Decrypt Messages"
         android:id="@+id/secretkeybutton"/>
     <ListView
         android:layout_width="match_parent"

@@ -16,12 +16,18 @@ Class ConvoAdapter
 Class BroadcastReciever
 Class MyDBHandler
 
-MainActivity"1" -*"*" Contact
-MainActivity --> ContactsAdapter
-ContactsAdapter --> Contact
-Contact--o Conversation
-Message --> MainActivity
-Message->Conversation
+MainActivity <- Message
+MainActivity "1" --* "0..*" Contact
+MainActivity -> ContactsAdapter
+Message "1"--* "0..*"Conversation
+Message --> ConvoAdapter
+Message ----> BroadcastReciever
+Contact "1" --o "0..*" Conversation
+MyDBHandler *-- Message
+Contact <-ContactsAdapter
+Conversation <--- ConvoAdapter
+
+
 
 
 
@@ -53,6 +59,7 @@ Class Message{
 +encryptSMS(String,String): byte[]
 +decryptSMS(String,byte[]): String
 +refreshSMSinbox(): Void
++getSMSMessages(): Void
 }
 
 Class Conversation{

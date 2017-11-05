@@ -16,13 +16,14 @@ Class ConvoAdapter
 Class BroadcastReciever
 Class MyDPHelper
 
-MainActivity "1"  -- "*"Contact : store
-MainActivity"1" -- "1"ContactsAdapter: Display
-MainActivity -Message : Selected contact
-Message"1" --"1" ConvoAdapter : Display
-Message"1" -- "*" Conversation : Store
+MainActivity"1" -- "1"ContactsAdapter: Display contacts ArrayList
+MainActivity "1"  -- "*"Contact : store contact
+MainActivity -Message : set secretkey & select contact
+Message"1" --"1" ConvoAdapter : Display convo \nArrayList
+Message"1" -- "*" Conversation : Store sent &\nrecieved msges\nas conversation\nobject
 Message"1" -"*" BroadcastReciever : Recieve message
-Message -- MyDPHelper : SecretKey
+Message -- MyDPHelper : store \nSecretKey
+
 
 
 Class MainActivity{
@@ -40,6 +41,11 @@ UpdateSMSInbox(Conversation): Void
 GetSMSMessages(): Void
 sendSMS(String, String): Void
 encryptSMS(String, String): byte[]
+}
+
+Class Conversation{
+setRecievedMessage()
+
 }
 
 @enduml
