@@ -35,18 +35,15 @@ public class MainActivity extends AppCompatActivity  {
     String FILENAME = "UsersSecretKey";
     FileOutputStream fos;
     String secret;
-
-
+    private final BroadcastReciever myReciever = new BroadcastReciever();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //getting permission to access our contacts
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},1);
 
         contact  = new ArrayList<Contact>();
-
         //gets contact names and numbers from our phones
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI,null,null,null,null);
@@ -64,9 +61,7 @@ public class MainActivity extends AppCompatActivity  {
         adapter = new ContactsAdapter(this, contact);
         listView = (ListView)findViewById(R.id.list);
         listView.setAdapter(adapter);
-
         mysecretkey = (EditText)findViewById(R.id.mysecretkey);
-
         //get secret key from internal storage
         try {
             FileInputStream fin = openFileInput(FILENAME);
@@ -80,8 +75,6 @@ public class MainActivity extends AppCompatActivity  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         //opens up Message.java
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -93,7 +86,6 @@ public class MainActivity extends AppCompatActivity  {
                 secretkey = mysecretkey.getText().toString();
                 if(mysecretkey.length() == 16) {
                     String string = mysecretkey.getText().toString();
-
                     //store secret key to internal storage
                     try {
                         fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
@@ -117,6 +109,4 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
     }
-
-
 }

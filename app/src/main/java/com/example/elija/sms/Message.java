@@ -2,6 +2,7 @@ package com.example.elija.sms;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -41,6 +42,7 @@ public class Message extends AppCompatActivity {
     private static Message inst;
     private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
     MyDBhandler dBhandler;
+    private final BroadcastReciever myReciever = new BroadcastReciever();
 
     public static Message instance() {
         return inst;
@@ -51,20 +53,31 @@ public class Message extends AppCompatActivity {
         super.onStart();
         inst = this;
     }
-
     public void printDatabase(){
         String dbString = dBhandler.databaseToString();
         Log.e("SQL", dbString);
     }
-
-
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(myReciever);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(myReciever, filter);
+    }
     @RequiresApi(api = M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
         listView = (ListView) findViewById(R.id.convo);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(myReciever, filter);
         dBhandler = new MyDBhandler(this,null,null,1);
         //allow SMS sending
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, 1);
@@ -103,7 +116,6 @@ public class Message extends AppCompatActivity {
            }
        }
        printDatabase();
-
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -281,7 +293,6 @@ public class Message extends AppCompatActivity {
                     READ_SMS_PERMISSIONS_REQUEST);
         }
     }
-
     //permissions to read sms stuff. dont touch
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -310,6 +321,8 @@ public class Message extends AppCompatActivity {
         int indexBody = smsInboxCursor.getColumnIndex("body");
         //this gets the address the message came from
         int indexAddress = smsInboxCursor.getColumnIndex("address");
+
+        int indexDate = smsInboxCursor.getColumnIndex("date");
         //right now its only getting messages sent to you
         if (indexBody < 0 || !smsInboxCursor.moveToFirst())
             return;
