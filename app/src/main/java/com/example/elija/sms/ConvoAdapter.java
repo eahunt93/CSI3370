@@ -7,13 +7,26 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by elija on 9/22/2017.
  */
 
 public class ConvoAdapter extends ArrayAdapter<Conversation> {
+
+
+    private String formatDate(long dateObject){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("LLL dd, yyyy");
+        return dateFormat.format(dateObject);
+    }
+
+    private String formatTime(Date dateObject){
+        SimpleDateFormat timeformat = new SimpleDateFormat("h:mm a");
+        return timeformat.format(dateObject);
+    }
 
     /**
      * Create a new {@link ContactsAdapter} object.
@@ -40,8 +53,7 @@ public class ConvoAdapter extends ArrayAdapter<Conversation> {
         sent.setText(currentConversation.getSentmessage());
 
         TextView recieved = (TextView)listItemView.findViewById(R.id.recieved);
-        recieved.setText(currentConversation.toString());
-
+        recieved.setText(currentConversation.getBody());
         return listItemView;
     }
 }

@@ -8,10 +8,12 @@ public class Conversation {
     String sentmessage;
     String body;
     String Address;
-    public Conversation(String sentmessage, String MessageBody, String Address){
+    long TimeInMilliSeconds;
+    public Conversation(String sentmessage, String MessageBody, String Address, long TimeInMilliSeconds){
         this.sentmessage = sentmessage;
         this.body = MessageBody;
         this.Address = Address;
+        this.TimeInMilliSeconds = TimeInMilliSeconds;
 
     }
     public String getAddress() {
@@ -38,8 +40,20 @@ public class Conversation {
         this.sentmessage = sentmessage;
     }
 
+    public long getTimeInMilliSeconds() {
+        return TimeInMilliSeconds;
+    }
+
+    public void setTimeInMilliSeconds(long timeInMilliSeconds) {
+        TimeInMilliSeconds = timeInMilliSeconds;
+    }
+
+
     @Override
     public String toString() {
-        return  Address + "\n " + body ;
+        return  Address + "\n " + body  ;
     }
+
 }
+
+

@@ -28,7 +28,8 @@ public class BroadcastReciever extends BroadcastReceiver {
 
                 smsBody = smsMessage.getMessageBody().toString();
                 String address = smsMessage.getOriginatingAddress();
-                 c = new Conversation("",smsBody, address);
+                long date = smsMessage.getTimestampMillis();
+                 c = new Conversation("",smsBody, address,0);
 
                 smsMessageStr +=  address + "\n";
                 smsMessageStr += smsBody + "\n";
