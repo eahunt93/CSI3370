@@ -252,6 +252,7 @@ public class MessageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     //Convert byte to hex
     public static String byte2hex(byte[] b) {
         String hs = "";
@@ -326,16 +327,16 @@ public class MessageActivity extends AppCompatActivity {
             if(c.getBody().toString().contains("issa secret") && c.getAddress().equals(number) || c.getAddress().equals("+1"+ number)) {
                 // convert the encrypted String message body to a byte
                 // array
-                String newbody = c.getBody().toString().replace("issa secret", "");
-                byte[] msg = hex2byte(newbody.getBytes());
+                String EncryptedMessage = c.getBody().toString().replace("issa secret", "");
+                byte[] msg = hex2byte(EncryptedMessage.getBytes());
                 // decrypt the byte array
                 byte[] result = decryptSMS(secretkey, msg);
-                String idk = new String(result);
+                String DecryptedMessage = new String(result);
                 //just formatting the decrypted message
-                if (idk.contains("Sent: ")) {
-                    idk = idk.replace("Sent: ", "");
+                if (DecryptedMessage.contains("Sent: ")) {
+                    DecryptedMessage = DecryptedMessage.replace("Sent: ", "");
                 }
-                ConversationObject c1 = new ConversationObject("", idk, c.getAddress(),0);
+                ConversationObject c1 = new ConversationObject("", DecryptedMessage, c.getAddress(),0);
                 convo.add(c1);
                 adapter.notifyDataSetChanged();
                 Log.e("HEEEELLLOOOO", c1.toString());
@@ -365,7 +366,6 @@ public class MessageActivity extends AppCompatActivity {
         int indexAddress = smsInboxCursor.getColumnIndex("address");
         //gets the date/time value so we can sort the messages in the correct order
         int indexDate = smsInboxCursor.getColumnIndex("date");
-
         //loop through and get received messages
         if (indexBody < 0 || !smsInboxCursor.moveToFirst())
             return;
@@ -374,7 +374,6 @@ public class MessageActivity extends AppCompatActivity {
                     smsInboxCursor.getString(indexAddress).equals("+1"+number)){
                 ConversationObject c = new ConversationObject("",smsInboxCursor.getString(indexBody),smsInboxCursor.getString(indexAddress),smsInboxCursor.getLong(indexDate));
                 recieved.add(c);
-
             }
         } while (smsInboxCursor.moveToNext());
     }

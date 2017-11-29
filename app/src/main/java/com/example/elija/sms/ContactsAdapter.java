@@ -14,8 +14,6 @@ import java.util.ArrayList;
  */
 
 public class ContactsAdapter extends ArrayAdapter<ContactObject> {
-
-
     /**
      * Create a new {@link ContactsAdapter} object.
      *
@@ -40,7 +38,6 @@ public class ContactsAdapter extends ArrayAdapter<ContactObject> {
 
         TextView name = (TextView)listItemView.findViewById(R.id.name);
         name.setText(currentContactObject.getContact());
-
 
         // Return the whole list item layout (containing 2 TextViews) so that it can be shown in
         // the ListView.

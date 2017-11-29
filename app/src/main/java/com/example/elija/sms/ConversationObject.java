@@ -14,8 +14,8 @@ public class ConversationObject {
         this.body = MessageBody;
         this.Address = Address;
         this.TimeInMilliSeconds = TimeInMilliSeconds;
-
     }
+
     public String getAddress() {
         return Address;
     }
@@ -47,7 +47,6 @@ public class ConversationObject {
     public void setTimeInMilliSeconds(long timeInMilliSeconds) {
         TimeInMilliSeconds = timeInMilliSeconds;
     }
-
 
     @Override
     public String toString() {

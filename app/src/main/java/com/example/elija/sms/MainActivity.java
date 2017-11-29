@@ -67,13 +67,12 @@ public class MainActivity extends AppCompatActivity  {
                 return o1.getContact().compareToIgnoreCase(o2.contact);
             }
         });
-
         //puts our contactObjects in the array adapter
         adapter = new ContactsAdapter(this, contactObject);
         listView = (ListView)findViewById(R.id.list);
         listView.setAdapter(adapter);
-        mysecretkey = (EditText)findViewById(R.id.mysecretkey);
 
+        mysecretkey = (EditText)findViewById(R.id.mysecretkey);
         //get secret key from internal storage
         try {
             FileInputStream fin = openFileInput(FILENAME);
@@ -99,7 +98,6 @@ public class MainActivity extends AppCompatActivity  {
                 secretkey = mysecretkey.getText().toString();
                 if(mysecretkey.length() == 16) {
                     String string = mysecretkey.getText().toString();
-
                     //store secret key to internal storage
                     try {
                         fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
