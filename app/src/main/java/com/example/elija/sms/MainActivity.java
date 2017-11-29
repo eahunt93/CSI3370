@@ -20,12 +20,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class MainActivity extends AppCompatActivity  {
 
     private ContactsAdapter adapter;
-    public ArrayList<Contact> contact;
+    public ArrayList<ContactObject> contactObject;
     public String title;
     public ListView listView;
     public String number;
@@ -40,11 +42,11 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //getting permission to access our contacts
+        //getting permission to access our contactObjects
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},1);
 
-        contact  = new ArrayList<Contact>();
-        //gets contact names and numbers from our phones
+        contactObject = new ArrayList<ContactObject>();
+        //gets contactObject names and numbers from our phones
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI,null,null,null,null);
         while(cursor.moveToNext()){
@@ -54,14 +56,24 @@ public class MainActivity extends AppCompatActivity  {
                     ContactsContract.CommonDataKinds.Phone.CONTACT_ID+ "= ?", new String[]{id},null);
             while(phoneCurser.moveToNext()){
                 String phoneNumber = phoneCurser.getString(phoneCurser.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                contact.add(new Contact(name,phoneNumber, ""));
+                contactObject.add(new ContactObject(name,phoneNumber, ""));
             }
         }
-        //puts our contacts in the array adapter
-        adapter = new ContactsAdapter(this, contact);
+
+        //alphabetizes the contactObject list
+        Collections.sort(contactObject, new Comparator<ContactObject>() {
+            @Override
+            public int compare(ContactObject o1, ContactObject o2) {
+                return o1.getContact().compareToIgnoreCase(o2.contact);
+            }
+        });
+
+        //puts our contactObjects in the array adapter
+        adapter = new ContactsAdapter(this, contactObject);
         listView = (ListView)findViewById(R.id.list);
         listView.setAdapter(adapter);
         mysecretkey = (EditText)findViewById(R.id.mysecretkey);
+
         //get secret key from internal storage
         try {
             FileInputStream fin = openFileInput(FILENAME);
@@ -75,17 +87,19 @@ public class MainActivity extends AppCompatActivity  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //opens up Message.java
+
+        //opens up MessageActivity.java when you click on a contactObject
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                title = contact.get(position).getContact();
-                number = contact.get(position).getNumber();
-                secretkey2 = contact.get(position).getSecretkey();
+                title = contactObject.get(position).getContact();
+                number = contactObject.get(position).getNumber();
+                secretkey2 = contactObject.get(position).getSecretkey();
                 mysecretkey = (EditText)findViewById(R.id.mysecretkey);
                 secretkey = mysecretkey.getText().toString();
                 if(mysecretkey.length() == 16) {
                     String string = mysecretkey.getText().toString();
+
                     //store secret key to internal storage
                     try {
                         fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
@@ -96,11 +110,11 @@ public class MainActivity extends AppCompatActivity  {
                         e.printStackTrace();
                     }
                     //get all the relevant variables from this class and give it to the message class.
-                    Intent intent = new Intent(MainActivity.this, Message.class);
+                    Intent intent = new Intent(MainActivity.this, MessageActivity.class);
                     intent.putExtra("mykey", secretkey);
                     intent.putExtra("title", title);
                     intent.putExtra("number", number);
-                    intent.putExtra("contact", contact);
+                    intent.putExtra("contactObject", contactObject);
                     startActivity(intent);
                 }else{
                     Toast.makeText(getBaseContext(), "Please make a 16 character long secret key",
@@ -109,4 +123,4 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
     }
-}
+}//end of MainActivity

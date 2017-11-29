@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.elija.sms.Message">
+    tools:context="com.example.elija.sms.MessageActivity">
 
 
     <EditText
@@ -14,17 +14,29 @@
         android:text=""
         android:id="@+id/secretkey"
         />
-    <Button
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Decrypt Messages"
-        android:id="@+id/secretkeybutton"/>
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Decrypt Messages"
+            android:id="@+id/decrypt"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set new secret key"
+            android:id="@+id/setsecretkey"/>
+
+    </LinearLayout>
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:stackFromBottom="true"
         android:id="@+id/convo"
+        android:divider="@null"
         />
 
  <LinearLayout

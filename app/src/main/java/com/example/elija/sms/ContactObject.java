@@ -6,12 +6,12 @@ import java.io.Serializable;
  * Created by elijah on 9/16/2017.
  */
 
-public class Contact implements Serializable{
+public class ContactObject implements Serializable{
     String contact;
     String number;
     String secretkey;
 
-    public Contact(String contact, String number, String secretkey){
+    public ContactObject(String contact, String number, String secretkey){
         this.contact = contact;
         this.number = number;
         this.secretkey = secretkey;

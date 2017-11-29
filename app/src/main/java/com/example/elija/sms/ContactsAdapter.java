@@ -13,17 +13,17 @@ import java.util.ArrayList;
  * Created by elijah on 9/16/2017.
  */
 
-public class ContactsAdapter extends ArrayAdapter<Contact> {
+public class ContactsAdapter extends ArrayAdapter<ContactObject> {
 
 
     /**
      * Create a new {@link ContactsAdapter} object.
      *
      * @param context is the current context (i.e. Activity) that the adapter is being created in.
-     * @param contacts is the list of {@link Contact}s to be displayed.
+     * @param contactObjects is the list of {@link ContactObject}s to be displayed.
      */
-    public ContactsAdapter(Context context, ArrayList<Contact> contacts) {
-        super(context, 0, contacts);
+    public ContactsAdapter(Context context, ArrayList<ContactObject> contactObjects) {
+        super(context, 0, contactObjects);
     }
 
     @Override
@@ -36,13 +36,10 @@ public class ContactsAdapter extends ArrayAdapter<Contact> {
         }
 
         // Get the {@link Word} object located at this position in the list
-       Contact currentContact = getItem(position);
+       ContactObject currentContactObject = getItem(position);
 
         TextView name = (TextView)listItemView.findViewById(R.id.name);
-        name.setText(currentContact.getContact());
-
-        TextView number = (TextView)listItemView.findViewById(R.id.number);
-        number.setText(currentContact.getNumber());
+        name.setText(currentContactObject.getContact());
 
 
         // Return the whole list item layout (containing 2 TextViews) so that it can be shown in

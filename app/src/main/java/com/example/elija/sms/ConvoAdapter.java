@@ -15,8 +15,7 @@ import java.util.Date;
  * Created by elija on 9/22/2017.
  */
 
-public class ConvoAdapter extends ArrayAdapter<Conversation> {
-
+public class ConvoAdapter extends ArrayAdapter<ConversationObject> {
 
     private String formatDate(long dateObject){
         SimpleDateFormat dateFormat = new SimpleDateFormat("LLL dd, yyyy");
@@ -28,13 +27,8 @@ public class ConvoAdapter extends ArrayAdapter<Conversation> {
         return timeformat.format(dateObject);
     }
 
-    /**
-     * Create a new {@link ContactsAdapter} object.
-     *
-     * @param context is the current context (i.e. Activity) that the adapter is being created in.
-     * @param convo   is the list of {@link Contact}s to be displayed.
-     */
-    public ConvoAdapter(Context context, ArrayList<Conversation> convo) {
+
+    public ConvoAdapter(Context context, ArrayList<ConversationObject> convo) {
         super(context, 0, convo);
     }
 
@@ -47,13 +41,13 @@ public class ConvoAdapter extends ArrayAdapter<Conversation> {
                     R.layout.message_item, parent, false);
         }
 
-        Conversation currentConversation = getItem(position);
-
+        ConversationObject currentConversationObject = getItem(position);
         TextView sent = (TextView)listItemView.findViewById(R.id.sent);
-        sent.setText(currentConversation.getSentmessage());
+        sent.setText(currentConversationObject.getSentmessage());
+
 
         TextView recieved = (TextView)listItemView.findViewById(R.id.recieved);
-        recieved.setText(currentConversation.getBody());
+        recieved.setText(currentConversationObject.getBody());
         return listItemView;
     }
 }

@@ -11,13 +11,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Sent"/>
-
-
+            android:textSize="20sp"
+            android:text="Sent"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            />
     <TextView
         android:id="@+id/recieved"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Recieved"/>
+        android:textSize="20sp"
+        android:text="Recieved"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"/>
 </LinearLayout>

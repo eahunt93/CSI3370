@@ -4,12 +4,12 @@ package com.example.elija.sms;
  * Created by elija on 9/22/2017.
  */
 
-public class Conversation {
+public class ConversationObject {
     String sentmessage;
     String body;
     String Address;
     long TimeInMilliSeconds;
-    public Conversation(String sentmessage, String MessageBody, String Address, long TimeInMilliSeconds){
+    public ConversationObject(String sentmessage, String MessageBody, String Address, long TimeInMilliSeconds){
         this.sentmessage = sentmessage;
         this.body = MessageBody;
         this.Address = Address;

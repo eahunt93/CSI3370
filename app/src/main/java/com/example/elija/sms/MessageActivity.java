@@ -31,24 +31,27 @@ import javax.crypto.spec.SecretKeySpec;
 
 import static android.os.Build.VERSION_CODES.M;
 
-public class Message extends AppCompatActivity {
+public class MessageActivity extends AppCompatActivity {
 
-    public String title;
-    public String number;
+    String title;
+    String number;
     EditText secretkey2;
-    ArrayList<Contact> contacts;
-    public String secretkey;
-    ArrayList<Conversation> convo;
+    ArrayList<ContactObject> contactObjects;
+    String secretkey;
+    ArrayList<ConversationObject> convo;
     ConvoAdapter adapter;
-    public ListView listView;
-    private static Message inst;
+    ListView listView;
+    private static MessageActivity inst;
     private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
     MyDBhandler dBhandler;
     private final BroadcastReciever myReciever = new BroadcastReciever();
-    ArrayList<Conversation> sent;
-    ArrayList<Conversation> recieved;
+    //list of all sent messages
+    ArrayList<ConversationObject> sent;
+    //list of all recieved messages
+    ArrayList<ConversationObject> recieved;
 
-    public static Message instance() {
+
+    public static MessageActivity instance() {
         return inst;
     }
     @Override
@@ -56,15 +59,18 @@ public class Message extends AppCompatActivity {
         super.onStart();
         inst = this;
     }
+    //prints SQLite database
     public void printDatabase(){
         String dbString = dBhandler.databaseToString();
         Log.e("SQL", dbString);
     }
+    //unregistering the broadcast receiver in when the app is paused.
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(myReciever);
     }
+    //registering the broadcast reciever when the app resumes
     @Override
     protected void onResume() {
         super.onResume();
@@ -83,24 +89,28 @@ public class Message extends AppCompatActivity {
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(myReciever, filter);
         dBhandler = new MyDBhandler(this,null,null,1);
-        //allow SMS sending
+        //allow SMS sending and receiving
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, 1);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, 1);
         //gets our variables and arraylist from the last page
         title = getIntent().getStringExtra("title").toString();
         number = getIntent().getStringExtra("number").toString();
-        contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("contact");
+        contactObjects = (ArrayList<ContactObject>) getIntent().getSerializableExtra("contactObject");
+
         //formats the phone number string so it can match the phone number coming in. probably shouldnt touch this
         if (number.contains("(") ||
                 number.contains(")") ||
                 number.contains(" ") ||
-                number.contains("-")) {
+                number.contains("-") ||
+                number.contains("+1")) {
             number = number.replace("(", "");
             number = number.replace(")", "");
             number = number.replace(" ", "");
             number = number.replace("-", "");
+            number = number.replace("+1", "");
         }
         Log.e("Formatted number", number);
+
         //sets the title and gets the users secret key from the MainActivity
         secretkey = getIntent().getStringExtra("mykey").toString();
         setTitle(title);
@@ -112,17 +122,7 @@ public class Message extends AppCompatActivity {
         recieved = new ArrayList<>();
         adapter = new ConvoAdapter(this, convo);
         listView.setAdapter(adapter);
-
-        //checks to see if database is empty.
-        //if so it adds all the contacts in
-       if(dBhandler.checkIfTableIsEmpty() == false){
-           for(int i = 0; i < contacts.size(); i++){
-               dBhandler.addContact(contacts.get(i));
-               printDatabase();
-           }
-       }
-       printDatabase();
-
+        //check to see if we have permission to read from sms and if we do we create the list
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             getPermissionToReadSMS();
@@ -130,53 +130,74 @@ public class Message extends AppCompatActivity {
         } else {
             refreshSmsInbox();
             refreshSmssent();
+            createconvolist();
             Toast.makeText(this, "Refreshing smsinbox", Toast.LENGTH_SHORT).show();
         }
-        createconvolist();
 
-        //sets the secret key of the person we are contacting, only need to edit this when we start to store the messages in SQLite
-        Button b = (Button) findViewById(R.id.secretkeybutton);
+        //checks to see if database is empty.
+        //if so it adds all the contactObjects in
+       if(dBhandler.checkIfTableIsEmpty() == false){
+           for(int i = 0; i < contactObjects.size(); i++){
+               dBhandler.addContact(contactObjects.get(i));
+           }
+       }
+       printDatabase();
+
+        //sets new secret key for the contactObject
+        Button b2 = (Button)findViewById(R.id.setsecretkey);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                secretkey2 = (EditText) findViewById(R.id.secretkey);
+                for(int i = 0; i < contactObjects.size(); i++){
+                    if(title.equals(contactObjects.get(i).getContact())){
+                        contactObjects.get(i).setSecretkey(secretkey2.getText().toString());
+                        dBhandler.upDateRow(contactObjects.get(i));
+                    }
+                }
+                printDatabase();
+            }
+        });
+
+        //decryts messages
+        Button b = (Button) findViewById(R.id.decrypt);
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<Conversation> temp = new ArrayList<>();
+                ArrayList<ConversationObject> temp = new ArrayList<>();
+                //set secretkey
                 secretkey2 = (EditText) findViewById(R.id.secretkey);
-                for(int i = 0; i < contacts.size(); i++){
-                    if(title.equals(contacts.get(i).getContact())){
-                        contacts.get(i).setSecretkey(secretkey2.getText().toString());
-                        dBhandler.upDateRow(contacts.get(i));
-                    }
-                }
+                //decrytps messages
                 for (int i = 0; i <= convo.size(); i++) {
                         try {
                             if (convo.get(i).getBody().contains("issa secret") && secretkey2.getText().length() ==16) {
 
-                                String lol = convo.get(i).getBody().replace("issa secret", "");
+                                String EncryptedMessage = convo.get(i).getBody().replace("issa secret", "");
                                 // convert the encrypted String message body to a byte
                                 // array
-                                byte[] msg = hex2byte(lol.getBytes());
+                                byte[] msg = hex2byte(EncryptedMessage.getBytes());
                                 // decrypt the byte array
                                 byte[] result = decryptSMS(secretkey2.getText().toString(), msg);
-                                String idk = new String(result);
-                                if (idk.contains("Sent: ")) {
-                                    idk = idk.replace("Sent: ", "");
+                                String DecryptedMessage = new String(result);
+                                if (DecryptedMessage.contains("Sent: ")) {
+                                    DecryptedMessage = DecryptedMessage.replace("Sent: ", "");
                                 }
-                                Log.e("Decrypted Body", idk);
-                                Conversation c1 = new Conversation("", idk, convo.get(i).getAddress(),0);
+                                Log.e("Decrypted Body", DecryptedMessage);
+                                ConversationObject c1 = new ConversationObject("", DecryptedMessage, convo.get(i).getAddress(),0);
                                 temp.add(c1);
                             }else if(convo.get(i).getSentmessage().contains("issa secret") && secretkey2.getText().length() == 16){
-                                String lol = convo.get(i).getSentmessage().replace("issa secret", "");
+                                String EncrytpedMessage = convo.get(i).getSentmessage().replace("issa secret", "");
                                 // convert the encrypted String message body to a byte
                                 // array
-                                byte[] msg = hex2byte(lol.getBytes());
+                                byte[] msg = hex2byte(EncrytpedMessage.getBytes());
                                 // decrypt the byte array
                                 byte[] result = decryptSMS(secretkey, msg);
-                                String idk = new String(result);
-                                if (idk.contains("Sent: ")) {
-                                    idk = idk.replace("Sent: ", "");
+                                String DecrytpedMessage = new String(result);
+                                if (DecrytpedMessage.contains("Sent: ")) {
+                                    DecrytpedMessage = DecrytpedMessage.replace("Sent: ", "");
                                 }
-                                Log.e("Decrypted Body", idk);
-                                Conversation c1 = new Conversation(idk, "", convo.get(i).getAddress(),0);
+                                Log.e("Decrypted Body", DecrytpedMessage);
+                                ConversationObject c1 = new ConversationObject(DecrytpedMessage, "", convo.get(i).getAddress(),0);
                                 temp.add(c1);
                             }else{
                                 temp.add(convo.get(i));
@@ -190,9 +211,11 @@ public class Message extends AppCompatActivity {
                 convo.clear();
                 convo.addAll(temp);
                 adapter.notifyDataSetChanged();
+                listView.smoothScrollToPosition(convo.size()-1);
             }
         });
-        //send message and add the message to the list
+
+        //send message and adds the message to the list
         Button send = (Button) findViewById(R.id.sendbutton);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -209,18 +232,19 @@ public class Message extends AppCompatActivity {
                 // send the message through SMS
                 sendSMS(number, "issa secret"+msgString);
 
-                convo.add(new Conversation(msgContentString, "", "",0));
+                convo.add(new ConversationObject(msgContentString, "", "",0));
                 adapter.notifyDataSetChanged();
                 msg.setText("");
+                listView.smoothScrollToPosition(convo.size() -1);
             }
         });
     }
-    //uses the smsManager to send the smsMessages, dont touch this
+    //uses the smsManager to send the smsMessages
     public static void sendSMS(String recNumString, String encryptedMsg) {
         try {
             // get a SmsManager
             SmsManager smsManager = SmsManager.getDefault();
-            // Message may exceed 160 characters
+            // MessageActivity may exceed 160 characters
             // need to divide the message into multiples
             ArrayList<String> parts = smsManager.divideMessage(encryptedMsg);
             smsManager.sendMultipartTextMessage(recNumString, null, parts, null, null);
@@ -228,7 +252,7 @@ public class Message extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    // utility function dont touch this
+    //Convert byte to hex
     public static String byte2hex(byte[] b) {
         String hs = "";
         String stmp = "";
@@ -242,7 +266,8 @@ public class Message extends AppCompatActivity {
         }
         return hs.toUpperCase();
     }
-    // encryption function dont touch this
+
+    // encryption function
     public static byte[] encryptSMS(String secretKeyString, String msgContentString) {
         try {
             byte[] returnArray;
@@ -261,15 +286,40 @@ public class Message extends AppCompatActivity {
             return returnArray;
         }
     }
-    //just generating a secret key. dont touch this
+    //generating a secret key.
     private static Key generateKey(String secretKeyString) throws Exception {
         // generate secret key from string
         Key key = new SecretKeySpec(secretKeyString.getBytes(), "AES");
         return key;
     }
+
+    // convert hex array to byte array
+    public static byte[] hex2byte(byte[] b) {
+        if ((b.length % 2) != 0)
+            throw new IllegalArgumentException("hello");
+        byte[] b2 = new byte[b.length / 2];
+        for (int n = 0; n < b.length; n += 2) {
+            String item = new String(b, n, 2);
+            b2[n / 2] = (byte) Integer.parseInt(item, 16);
+        }
+        return b2;
+    }
+
+    // decryption function.
+    public static byte[] decryptSMS(String secretKeyString, byte[] encryptedMsg) throws Exception {
+        // generate AES secret key from the user input secret key
+        Key key = generateKey(secretKeyString);
+        // get the cipher algorithm for AES
+        Cipher c = Cipher.getInstance("AES");
+        // specify the decryption mode
+        c.init(Cipher.DECRYPT_MODE, key);
+        // decrypt the message
+        byte[] decValue = c.doFinal(encryptedMsg);
+        return decValue;
+    }
     //gets the in coming SMS message, decrypts it if it can, if not it displays the encrypted message.
-    public void updateInbox(Conversation c) {
-        Log.e("New Message coming in", c.toString());
+    public void updateInbox(ConversationObject c) {
+        Log.e("New MessageActivity coming in", c.toString());
         secretkey2 = (EditText) findViewById(R.id.secretkey);
         String secretkey = secretkey2.getText().toString();
         try {
@@ -285,7 +335,7 @@ public class Message extends AppCompatActivity {
                 if (idk.contains("Sent: ")) {
                     idk = idk.replace("Sent: ", "");
                 }
-                Conversation c1 = new Conversation("", idk, c.getAddress(),0);
+                ConversationObject c1 = new ConversationObject("", idk, c.getAddress(),0);
                 convo.add(c1);
                 adapter.notifyDataSetChanged();
                 Log.e("HEEEELLLOOOO", c1.toString());
@@ -293,6 +343,7 @@ public class Message extends AppCompatActivity {
                 convo.add(c);
                 adapter.notifyDataSetChanged();
             }
+            listView.smoothScrollToPosition(convo.size()-1);
         } catch (Exception e) {
             // in the case of message corrupted or invalid key
             // decryption cannot be carried out
@@ -301,7 +352,72 @@ public class Message extends AppCompatActivity {
             Log.e("catch", "" + e);
         }
     }
-    //permissions to read from sms messages. dont touch this
+
+    //gets all recieved messages in SMS inbox.
+    public void refreshSmsInbox() {
+        //this is a cursor to go through and get all of your recieved messages
+        ContentResolver contentResolver = getContentResolver();
+        Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"),
+                null, null, null, null);
+        //this gets the message itsself
+        int indexBody = smsInboxCursor.getColumnIndex("body");
+        //this gets the address the message came from
+        int indexAddress = smsInboxCursor.getColumnIndex("address");
+        //gets the date/time value so we can sort the messages in the correct order
+        int indexDate = smsInboxCursor.getColumnIndex("date");
+
+        //loop through and get received messages
+        if (indexBody < 0 || !smsInboxCursor.moveToFirst())
+            return;
+        do {
+            if (smsInboxCursor.getString(indexAddress).equals(number)||
+                    smsInboxCursor.getString(indexAddress).equals("+1"+number)){
+                ConversationObject c = new ConversationObject("",smsInboxCursor.getString(indexBody),smsInboxCursor.getString(indexAddress),smsInboxCursor.getLong(indexDate));
+                recieved.add(c);
+
+            }
+        } while (smsInboxCursor.moveToNext());
+    }
+
+    //get sent messages
+    public void refreshSmssent() {
+        //this is a cursor to go through and get all of your recieved messages
+        ContentResolver contentResolver = getContentResolver();
+        Cursor smssentCursor = contentResolver.query(Uri.parse("content://sms/sent"),
+                null, null, null, null);
+        //this gets the message itsself
+        int indexBody = smssentCursor.getColumnIndex("body");
+        //this gets the address the message came from
+        int indexAddress = smssentCursor.getColumnIndex("address");
+        int indexDate = smssentCursor.getColumnIndex("date");
+        //get messages the user sent
+        if (indexBody < 0 || !smssentCursor.moveToFirst())
+            return;
+        do {
+            if (smssentCursor.getString(indexAddress).equals(number)|| smssentCursor.getString(indexAddress).equals("+1"+number)){
+                ConversationObject c = new ConversationObject(smssentCursor.getString(indexBody), "",smssentCursor.getString(indexAddress), smssentCursor.getLong(indexDate));
+                sent.add(c);
+            }
+        } while (smssentCursor.moveToNext());
+    }
+
+    //combines the sent and recieved messages and sort them by their date and time
+    public void createconvolist(){
+        convo.clear();
+        convo.addAll(sent);
+        adapter.notifyDataSetChanged();
+        convo.addAll(recieved);
+        adapter.notifyDataSetChanged();
+        Collections.reverse(convo);
+        Collections.sort(convo, new Comparator<ConversationObject>() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public int compare(ConversationObject o1, ConversationObject o2) {
+                return Long.compare(o1.getTimeInMilliSeconds(), o2.getTimeInMilliSeconds());
+            }
+        });
+    }
+    //permissions to read from sms messages.
     @RequiresApi(api = M)
     public void getPermissionToReadSMS() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
@@ -314,7 +430,7 @@ public class Message extends AppCompatActivity {
                     READ_SMS_PERMISSIONS_REQUEST);
         }
     }
-    //permissions to read sms stuff. dont touch
+    //permissions to read sms stuff
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
@@ -332,93 +448,4 @@ public class Message extends AppCompatActivity {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
-    //gets all recieved messages in SMS inbox. eventually we want to get all messages but its tricky.
-    public void refreshSmsInbox() {
-        //this is a cursor to go through and get all of your recieved messages
-        ContentResolver contentResolver = getContentResolver();
-        Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"),
-                null, null, null, null);
-        Cursor smssentCursor = contentResolver.query(Uri.parse("content://sms/sent"),
-                null, null, null, null);
-        //this gets the message itsself
-        int indexBody = smsInboxCursor.getColumnIndex("body");
-        //this gets the address the message came from
-        int indexAddress = smsInboxCursor.getColumnIndex("address");
-
-        int indexDate = smsInboxCursor.getColumnIndex("date");
-
-        //right now its only getting messages sent to you
-        if (indexBody < 0 || !smsInboxCursor.moveToFirst())
-            return;
-        do {
-            if (smsInboxCursor.getString(indexAddress).equals(number)|| smsInboxCursor.getString(indexAddress).equals("+1"+number)){
-                Conversation c = new Conversation("",smsInboxCursor.getString(indexBody),smsInboxCursor.getString(indexAddress),smsInboxCursor.getLong(indexDate));
-                recieved.add(c);
-
-            }
-        } while (smsInboxCursor.moveToNext());
-    }
-    public void refreshSmssent() {
-        //this is a cursor to go through and get all of your recieved messages
-        ContentResolver contentResolver = getContentResolver();
-        Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"),
-                null, null, null, null);
-        Cursor smssentCursor = contentResolver.query(Uri.parse("content://sms/sent"),
-                null, null, null, null);
-        //this gets the message itsself
-        int indexBody = smssentCursor.getColumnIndex("body");
-        //this gets the address the message came from
-        int indexAddress = smssentCursor.getColumnIndex("address");
-
-        int indexDate = smssentCursor.getColumnIndex("date");
-
-        //right now its only getting messages sent to you
-        if (indexBody < 0 || !smssentCursor.moveToFirst())
-            return;
-        do {
-            if (smssentCursor.getString(indexAddress).equals(number)|| smssentCursor.getString(indexAddress).equals("+1"+number)){
-                Conversation c = new Conversation(smssentCursor.getString(indexBody), "",smssentCursor.getString(indexAddress), smssentCursor.getLong(indexDate));
-                sent.add(c);
-            }
-        } while (smssentCursor.moveToNext());
-    }
-
-    public void createconvolist(){
-        convo.clear();
-        convo.addAll(sent);
-        adapter.notifyDataSetChanged();
-        convo.addAll(recieved);
-        adapter.notifyDataSetChanged();
-        Collections.reverse(convo);
-        Collections.sort(convo, new Comparator<Conversation>() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public int compare(Conversation o1, Conversation o2) {
-                return Long.compare(o1.getTimeInMilliSeconds(), o2.getTimeInMilliSeconds());
-            }
-        });
-    }
-    // utility function: convert hex array to byte array. dont touch
-    public static byte[] hex2byte(byte[] b) {
-        if ((b.length % 2) != 0)
-            throw new IllegalArgumentException("hello");
-        byte[] b2 = new byte[b.length / 2];
-        for (int n = 0; n < b.length; n += 2) {
-            String item = new String(b, n, 2);
-            b2[n / 2] = (byte) Integer.parseInt(item, 16);
-        }
-        return b2;
-    }
-    // decryption function. dont touch
-    public static byte[] decryptSMS(String secretKeyString, byte[] encryptedMsg) throws Exception {
-        // generate AES secret key from the user input secret key
-        Key key = generateKey(secretKeyString);
-        // get the cipher algorithm for AES
-        Cipher c = Cipher.getInstance("AES");
-        // specify the decryption mode
-        c.init(Cipher.DECRYPT_MODE, key);
-        // decrypt the message
-        byte[] decValue = c.doFinal(encryptedMsg);
-        return decValue;
-    }
-}
+}//End of MessageActivity class

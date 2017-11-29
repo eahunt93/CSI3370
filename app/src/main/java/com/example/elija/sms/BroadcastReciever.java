@@ -21,7 +21,7 @@ public class BroadcastReciever extends BroadcastReceiver {
             Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
             String smsMessageStr = "";
             String smsBody = "";
-            Conversation c = null;
+            ConversationObject c = null;
             for (int i = 0; i < sms.length; ++i) {
                 String format = intentExtras.getString("format");
                 SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) sms[i], format);
@@ -29,12 +29,12 @@ public class BroadcastReciever extends BroadcastReceiver {
                 smsBody = smsMessage.getMessageBody().toString();
                 String address = smsMessage.getOriginatingAddress();
                 long date = smsMessage.getTimestampMillis();
-                 c = new Conversation("",smsBody, address,0);
+                 c = new ConversationObject("",smsBody, address,0);
 
                 smsMessageStr +=  address + "\n";
                 smsMessageStr += smsBody + "\n";
             }
-            Message inst = Message.instance();
+            MessageActivity inst = MessageActivity.instance();
             inst.getIntent().putExtra("messagebody", smsBody);
             inst.updateInbox(c);
         }
