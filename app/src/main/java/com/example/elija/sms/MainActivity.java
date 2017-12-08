@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity  {
 
         contactObject = new ArrayList<ContactObject>();
         //gets contactObject names and numbers from our phones
+        //Code cite: https://www.youtube.com/watch?v=g4_1UOFNLEY
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI,null,null,null,null);
         while(cursor.moveToNext()){

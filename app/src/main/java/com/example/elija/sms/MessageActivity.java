@@ -240,6 +240,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
     //uses the smsManager to send the smsMessages
+    //Code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     public static void sendSMS(String recNumString, String encryptedMsg) {
         try {
             // get a SmsManager
@@ -254,6 +255,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //Convert byte to hex
+    // code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     public static String byte2hex(byte[] b) {
         String hs = "";
         String stmp = "";
@@ -269,6 +271,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // encryption function
+    //code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     public static byte[] encryptSMS(String secretKeyString, String msgContentString) {
         try {
             byte[] returnArray;
@@ -288,6 +291,7 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
     //generating a secret key.
+    //code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     private static Key generateKey(String secretKeyString) throws Exception {
         // generate secret key from string
         Key key = new SecretKeySpec(secretKeyString.getBytes(), "AES");
@@ -295,6 +299,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // convert hex array to byte array
+    //Code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     public static byte[] hex2byte(byte[] b) {
         if ((b.length % 2) != 0)
             throw new IllegalArgumentException("hello");
@@ -307,6 +312,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     // decryption function.
+    //Code cite: https://sites.google.com/site/mobilesecuritylabware/3-data-location-privacy/lab-activity/cryptography/cryptography-mobile-labs/encryption-decryption/2-lab-activity/lab-1-encryption-decryption-on-sms-android-studio
     public static byte[] decryptSMS(String secretKeyString, byte[] encryptedMsg) throws Exception {
         // generate AES secret key from the user input secret key
         Key key = generateKey(secretKeyString);
@@ -319,6 +325,7 @@ public class MessageActivity extends AppCompatActivity {
         return decValue;
     }
     //gets the in coming SMS message, decrypts it if it can, if not it displays the encrypted message.
+    //Code cite: https://www.androidauthority.com/how-to-create-an-sms-app-721438/
     public void updateInbox(ConversationObject c) {
         Log.e("New MessageActivity coming in", c.toString());
         secretkey2 = (EditText) findViewById(R.id.secretkey);
@@ -355,6 +362,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //gets all recieved messages in SMS inbox.
+    //Code cite: https://www.androidauthority.com/how-to-create-an-sms-app-721438/
     public void refreshSmsInbox() {
         //this is a cursor to go through and get all of your recieved messages
         ContentResolver contentResolver = getContentResolver();
@@ -379,6 +387,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //get sent messages
+    //Code cite: https://www.androidauthority.com/how-to-create-an-sms-app-721438/
     public void refreshSmssent() {
         //this is a cursor to go through and get all of your recieved messages
         ContentResolver contentResolver = getContentResolver();
@@ -416,7 +425,9 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
     }
+
     //permissions to read from sms messages.
+    //Code cite: https://www.androidauthority.com/how-to-create-an-sms-app-721438/
     @RequiresApi(api = M)
     public void getPermissionToReadSMS() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
@@ -430,6 +441,7 @@ public class MessageActivity extends AppCompatActivity {
         }
     }
     //permissions to read sms stuff
+    //code cite: https://www.androidauthority.com/how-to-create-an-sms-app-721438/
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],

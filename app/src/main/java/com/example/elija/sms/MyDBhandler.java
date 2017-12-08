@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by elija on 11/1/2017.
  */
 
+//Code cite: https://www.youtube.com/watch?v=Jcmp09LkU-I
 public class MyDBhandler extends SQLiteOpenHelper {
     private  static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "SecretKeys.dp";
